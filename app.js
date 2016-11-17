@@ -41,15 +41,18 @@ mongoose.connect(connectionstring);
 
 const optionDefinitions = [
     { name: 'verbose', alias: 'v', type: Boolean },
-    { name: 'batch', alias: 'b', type: Number }
+    { name: 'batch', alias: 'b', type: Number, defaultValue: 100 },
+    { name: 'company', alias: 'c', type: Number, defaultValue: -1 },
+    { name: 'tenant', alias: 't', type: Number, defaultValue: -1 },
+    { name: 'file', alias: 'f', type: String, defaultValue:'my.csv' }
 ];
 
 const options = commandLineArgs(optionDefinitions)
 
+console.log(options)
 
 
-
-var stream = fs.createReadStream("my.csv");
+var stream = fs.createReadStream(options.file);
 
 /*
 var csvStream = csv
@@ -171,8 +174,8 @@ stream.pipe(parse({delimiter: ',', quote:'', escape:'', relax_column_count:true,
 
             //phone: csvrow.PHONE01,
             //email: csvrow.EMAIL,
-            company: 2,
-            tenant: 2,
+            company: options.company,
+            tenant: options.tenant,
             created_at: Date.now(),
             updated_at: Date.now()
         });
@@ -205,7 +208,7 @@ stream.pipe(parse({delimiter: ',', quote:'', escape:'', relax_column_count:true,
     })
     .on('end',function() {
 
-        var chunk = chunks(csvData, 100);
+        var chunk = chunks(csvData, options.batch);
         csvData = [];
 
         chunk.forEach(function(item){
