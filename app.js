@@ -10,24 +10,36 @@ var config = require('config');
 const commandLineArgs = require('command-line-args')
 var csv = require('fast-csv');
 var fs = require('fs');
+
+
 var mongoip=config.Mongo.ip;
 var mongoport=config.Mongo.port;
 var mongodb=config.Mongo.dbname;
 var mongouser=config.Mongo.user;
 var mongopass = config.Mongo.password;
 var mongoreplicaset= config.Mongo.replicaset;
-var mongourl =config.Mongo.url;
 
 //mongodb://username:password@db1.example.net,db2.example.net:2500/?replicaSet=test
 
 var mongoose = require('mongoose');
-var connectionstring = util.format('mongodb://%s:%s@%s:%d/%s',mongouser,mongopass,mongoip,mongoport,mongodb);
 
+var connectionstring = '';
+if(util.isArray(mongoip)){
 
-if(mongoreplicaset && mongourl){
-    connectionstring = util.format('mongodb://%s:%s@%s/%s?replicaSet=%s',mongouser,mongopass,mongoip,mongodb,mongoreplicaset) ;
+    mongoip.forEach(function(item){
+        connectionstring += util.format('%s:%d,',item,mongoport)
+    });
+
+    connectionstring = connectionstring.substring(0, connectionstring.length - 1);
+    connectionstring = util.format('mongodb://%s:%s@%s/%s',mongouser,mongopass,connectionstring,mongodb);
+
+    if(mongoreplicaset){
+        connectionstring = util.format('%s?replicaSet=%s',connectionstring,mongoreplicaset) ;
+    }
+}else{
+
+    connectionstring = util.format('mongodb://%s:%s@%s:%d/%s',mongouser,mongopass,mongoip,mongoport,mongodb)
 }
-
 
 var async = require("async");
 
@@ -70,9 +82,6 @@ process.on('SIGINT', function() {
     });
 });
 
-
-
-
 const optionDefinitions = [
     { name: 'verbose', alias: 'v', type: Boolean },
     { name: 'batch', alias: 'b', type: Number, defaultValue: 100 },
@@ -84,7 +93,6 @@ const optionDefinitions = [
 const options = commandLineArgs(optionDefinitions)
 
 console.log(options)
-
 
 var stream = fs.createReadStream(options.file);
 
@@ -115,32 +123,6 @@ ExternalUser.findOne({}, function(err,data){
 
 stream.pipe(parse({delimiter: ',', quote:'', escape:'', relax_column_count:true, columns:['CLIENTNO','STAKEHOLDERNO','FIRSTNAME','SECONDNAME','LASTNAME','GLOBAL_ID_TYPE','CUSTOMERCODE','PHONE01','PHONE02','PHONE03','PHONE04','TITLE','EMAIL','CITY','ADDRESSLINE1','ADDRESSLINE2','ADDRESSLINE3']}))
     .on('data', function(csvrow) {
-        //console.log(csvrow);
-        //do something with csvrow
-
-
-        //CLIENTNO: '0000IY000543',
-        //    STAKEHOLDERNO: '',
-        //    FIRSTNAME: '#',
-        //    SECONDNAME: '#',
-        //    LASTNAME: 'P YAYANETTI',
-        //    GLOBAL_ID_TYPE: '',
-        //    CUSTOMERCODE: '0000IY000543',
-        //    PHONE01: '#',
-        //    PHONE02: '',
-        //    PHONE03: '',
-        //    PHONE04: '',
-        //    TITLE: 'MR',
-        //    EMAIL: '',
-        //    CITY: '#',
-        //    ADDRESSLINE1: 'NO 250 LEFT BANK MAHAWILACHCHIYA',
-        //    ADDRESSLINE2: '#',
-        //    ADDRESSLINE3: '#'
-
-        //{contacts : {contact:req.params.contact, type:req.body.type, verified: false}}
-
-
-        //generate contacts
 
         var contacts = [];
 
@@ -235,6 +217,7 @@ stream.pipe(parse({delimiter: ',', quote:'', escape:'', relax_column_count:true,
         }
 
 
+        console.log(csvrow.CUSTOMERCODE);
 
         csvData.push(extUser);
 
@@ -266,7 +249,7 @@ stream.pipe(parse({delimiter: ',', quote:'', escape:'', relax_column_count:true,
         });
 
 
-        /*
+
 
         async.waterfall(asyncTasks, function(){
             // All tasks are done now
@@ -274,7 +257,7 @@ stream.pipe(parse({delimiter: ',', quote:'', escape:'', relax_column_count:true,
             console.log("data insertion completed");
         });
 
-        */
+
 
 
     });

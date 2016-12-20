@@ -2,8 +2,6 @@ module.exports = {
 
   "Mongo":
   {
-    //"replicaset": "set",
-    "url":"45.55.142.207:27017",
     "ip":"45.55.142.207",
     "port":"27017",
     "dbname":"dvpdb",
