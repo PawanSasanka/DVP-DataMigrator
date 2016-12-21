@@ -84,7 +84,7 @@ process.on('SIGINT', function() {
 
 const optionDefinitions = [
     { name: 'verbose', alias: 'v', type: Boolean },
-    { name: 'batch', alias: 'b', type: Number, defaultValue: 100 },
+    { name: 'batch', alias: 'b', type: Number, defaultValue: 10000 },
     { name: 'company', alias: 'c', type: Number, defaultValue: -1 },
     { name: 'tenant', alias: 't', type: Number, defaultValue: -1 },
     { name: 'file', alias: 'f', type: String, defaultValue:'my.csv' }
@@ -202,11 +202,9 @@ stream.pipe(parse({delimiter: ',', quote:'', escape:'', relax_column_count:true,
             extUser.name = csvrow.LASTNAME;
         }
 
-
         if(csvrow.PHONE01 && csvrow.PHONE01 != '#'){
             extUser.phone = csvrow.PHONE01;
         }
-
 
         if(csvrow.EMAIL && csvrow.EMAIL != '#'){
             extUser.email = csvrow.EMAIL;
@@ -216,9 +214,7 @@ stream.pipe(parse({delimiter: ',', quote:'', escape:'', relax_column_count:true,
             extUser.ssn = csvrow.CUSTOMERCODE;
         }
 
-
         console.log(csvrow.CUSTOMERCODE);
-
         csvData.push(extUser);
 
 
@@ -231,8 +227,6 @@ stream.pipe(parse({delimiter: ',', quote:'', escape:'', relax_column_count:true,
         chunk.forEach(function(item){
 
             asyncTasks.push(function(callback){
-
-
 
                 ExternalUser.insertMany(item)
                     .then(function(mongooseDocuments) {
