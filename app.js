@@ -5,13 +5,14 @@
 
 var ExternalUser = require('dvp-mongomodels/model/ExternalUser');
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
-var util = require('util');
+
 var config = require('config');
 const commandLineArgs = require('command-line-args')
 var csv = require('fast-csv');
 var fs = require('fs');
 
 
+var util = require('util');
 var mongoip=config.Mongo.ip;
 var mongoport=config.Mongo.port;
 var mongodb=config.Mongo.dbname;
@@ -19,10 +20,7 @@ var mongouser=config.Mongo.user;
 var mongopass = config.Mongo.password;
 var mongoreplicaset= config.Mongo.replicaset;
 
-//mongodb://username:password@db1.example.net,db2.example.net:2500/?replicaSet=test
-
 var mongoose = require('mongoose');
-
 var connectionstring = '';
 if(util.isArray(mongoip)){
 
@@ -43,7 +41,7 @@ if(util.isArray(mongoip)){
 
 var async = require("async");
 
-var reconnTimer = null;
+
 mongoose.connect(connectionstring,{server:{auto_reconnect:true}});
 
 
@@ -65,7 +63,7 @@ mongoose.connection.on('disconnected', function() {
 
 mongoose.connection.once('open', function() {
     console.log("Connected to db");
-    if (reconnTimer) { clearTimeout(reconnTimer); reconnTimer = null; }
+
 });
 
 
